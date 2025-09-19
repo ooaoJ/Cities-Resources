@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <title>Cities&Resources</title>
@@ -7,35 +8,70 @@
         body {
             margin: 0;
             overflow: hidden;
+            background-color: #212121;
         }
+
         canvas {
             display: block;
         }
-        #ui {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            color: white;
-            font-family: Arial, sans-serif;
-            z-index: 10;
-        }
+
         button {
             padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
             margin-top: 5px;
         }
+
+        #top-bar {
+            background: rgba(33, 33, 33, 0.85);
+            backdrop-filter: blur(6px);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 12px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+        }
+
+        button {
+            background: #ff9800;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #e68900;
+            transform: scale(1.05);
+        }
     </style>
 </head>
+
 <body>
-    <div id="ui">
-        <div>Comida: <span id="food">0</span> Produção: <span id="production">0</span></div>
+    <div id="top-bar">
+        <div class="resource"><span>🍎</span> <span id="food">10</span></div>
+        <div class="resource"><span>🛠</span> <span id="production">5</span></div>
+        <div class="resource"><span>👥</span> <span id="population">30</span></div>
         <button id="nextTurn">Próximo Turno</button>
     </div>
+
     <canvas id="canvas"></canvas>
 
     <script src="js/map.js"></script>
     <script src="js/main.js"></script>
     <script src="js/ui.js"></script>
 </body>
+
 </html>

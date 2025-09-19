@@ -1,6 +1,5 @@
 window.addEventListener('DOMContentLoaded', () => {
 
-    let production = window.cities
     const foodDisplay = document.getElementById('food');
     const productionDisplay = document.getElementById('production');
     function updateUI() {
@@ -15,7 +14,7 @@ window.addEventListener('DOMContentLoaded', () => {
     nextTurnBtn.addEventListener('click', () => {
         cities.forEach(city => {
             city.food += (city['population'] * 3) / 2.5;
-            console.log('Cidade: ' + city['name'], '-- População: ' + city['population'], '-- Produção: ' + city['production'], '-- Comida: ' + city['food']);
+            console.log(city);
         });
         updateUI();
     });
