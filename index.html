@@ -22,25 +22,10 @@
             margin-top: 5px;
         }
 
-        #top-bar {
-            background: rgba(33, 33, 33, 0.85);
-            backdrop-filter: blur(6px);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 12px;
-            display: flex;
-            gap: 20px;
-            align-items: center;
+        button#nextTurn {
             position: absolute;
             top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            font-family: Arial, sans-serif;
-            font-size: 18px;
-        }
-
-        button {
+            left: 10px;
             background: #ff9800;
             border: none;
             border-radius: 12px;
@@ -52,20 +37,88 @@
             transition: 0.2s;
         }
 
+        button#resetGame {
+            position: absolute;
+            top: 10px;
+            left: 180px;
+            background: #e53935;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.14s;
+        }
+
+        button#resetGame:hover {
+            transform: scale(1.03);
+            background: #d32f2f;
+        }
+
         button:hover {
             background: #e68900;
             transform: scale(1.05);
+        }
+
+        #logo {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+        }
+
+        #logo img {
+            width: 200px;
+        }
+
+        #top-info {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.45);
+            padding: 8px 12px;
+            border-radius: 8px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            z-index: 60;
+        }
+
+        #top-info div {
+            display: flex;
+            gap: 6px;
+            align-items: center;
         }
     </style>
 </head>
 
 <body>
-    <div id="top-bar">
-        <div class="resource"><span>🍎</span> <span id="food">0</span></div>
-        <div class="resource"><span>🛠</span> <span id="production">0</span></div>
-        <div class="resource"><span>👥</span> <span id="population">0</span></div>
-        <div class="resource"><span>💵</span> <span id="money">0</span></div>
-        <button id="nextTurn">Próximo Turno</button>
+    <div id="logo">
+        <img src="assets/images/logo.png" alt="Cities&Resources">
+    </div>
+
+    <div id="turno">
+        <button id="nextTurn">Próximo turno</button>
+        <button id="resetGame">Reiniciar jogo</button>
+    </div>
+
+    <div id="city-panel"
+        style="position:absolute; right:12px; top:150px; background:rgba(10,10,10,0.85); color:#fff; padding:12px; border-radius:10px; display:none; width:260px; font-family:Arial, sans-serif; z-index:50;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong class="city-name">Cidade</strong>
+            <button id="close-city-panel"
+                style="background:#ff5252;border:none;color:#fff;padding:4px 8px;border-radius:6px;cursor:pointer;">X</button>
+        </div>
+        <div style="margin-top:8px; font-size:14px;">
+            <div>👥 Pop: <span class="city-pop">0</span></div>
+            <div>🍎 Food: <span class="city-food">0</span></div>
+            <div>🛠 Prod: <span class="city-prod">0</span></div>
+            <div>💵 Money: <span class="city-money">0</span></div>
+        </div>
     </div>
 
     <canvas id="canvas"></canvas>
