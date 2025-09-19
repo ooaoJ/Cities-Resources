@@ -127,27 +127,13 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Construir fazenda: chama cityAction (main.js fará a integração com map.js)
-  const buildFarmBtn = document.getElementById('build-farm');
-  if (buildFarmBtn) {
-    buildFarmBtn.addEventListener('click', () => {
-      if (!cityPanel) return;
-      const idx = parseInt(cityPanel.dataset.cityIndex);
-      if (isNaN(idx)) return;
-      if (window.cityAction && typeof window.cityAction.buildFarm === 'function') {
-        window.cityAction.buildFarm(idx);
-        if (window.showCityInfo) showCityInfo(window.cities[idx], idx);
-        if (window.updateUI) window.updateUI();
-      }
-    });
-  }
-
   // mapa de opções por terreno
   const BUILD_TABLE = {
     0: [ // grass
       { type: 'farm', name: 'Fazenda', cost: 200, turns: 1 },
       { type: 'factory', name: 'Fábrica', cost: 500, turns: 3 },
-      { type: 'market', name: 'Comércio', cost: 300, turns: 2 }
+      { type: 'market', name: 'Comércio', cost: 300, turns: 2 },
+      { type: 'house', name: 'Casa', cost: 100, turns: 1}
     ],
     1: [ // forest
       { type: 'lumber', name: 'Serralheria', cost: 250, turns: 2 },
@@ -165,7 +151,7 @@ window.addEventListener('DOMContentLoaded', () => {
       { type: 'house', name: 'Casa', cost: 100, turns: 1 }
     ],
     3: [ // ocean - poucas opções (ou nenhuma)
-      { type: 'house', name: 'Casa', cost: 100, turns: 1 }
+      
     ]
   };
 
@@ -224,7 +210,7 @@ window.addEventListener('DOMContentLoaded', () => {
       btn.style.background = '#1e1e1e';
       btn.style.color = '#fff';
       btn.style.cursor = 'pointer';
-      btn.innerHTML = `<div style="font-weight:600">${opt.name}</div><div style="opacity:0.9">C:${opt.cost} • ${opt.turns}T</div>`;
+      btn.innerHTML = `<div style="font-weight:600">${opt.name}</div><div style="opacity:0.9">${opt.cost}💵 • ${opt.turns}⏳</div>`;
 
       btn.addEventListener('click', () => {
         const res = window.cityAction && window.cityAction.queueBuilding
