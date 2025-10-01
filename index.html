@@ -2,123 +2,313 @@
 <html lang="pt-BR">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Cities&Resources</title>
     <style>
+        :root {
+            --bg: #121212;
+            --panel: #1a1a1a;
+            --accent: #ff9800;
+            --accent-2: #ffd54f;
+            --muted: #bdbdbd;
+            --glass: rgba(255, 255, 255, 0.04);
+            --glass-strong: rgba(255, 255, 255, 0.07);
+        }
+
+        html,
         body {
+            height: 100%;
             margin: 0;
-            overflow: hidden;
-            background-color: #212121;
+            background: linear-gradient(180deg, #0f1113 0%, #141414 100%);
+            font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+            color: #fff;
+            overflow: hidden
+        }
+
+        #ui-main {
+            position: absolute;
+            left: 10px;
+            right: 10px;
+            top: 10px;
+            height: 78px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px;
+            border-radius: 12px;
+            z-index: 60;
+            background: linear-gradient(180deg, rgba(20, 20, 20, 0.9), rgba(12, 12, 12, 0.75));
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(6px) saturate(1.05);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        #left-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-left: 8px
+        }
+
+        #logo img {
+            height: 56px;
+            display: block;
+            border-radius: 6px
+        }
+
+        #controls {
+            display: flex;
+            gap: 8px;
+            align-items: center
+        }
+
+        button.control {
+            background: linear-gradient(180deg, var(--accent), #e67a00);
+            border: none;
+            padding: 8px 14px;
+            border-radius: 10px;
+            color: #111;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 6px 14px rgba(255, 152, 0, 0.13);
+            transition: transform .12s ease, box-shadow .12s ease, opacity .12s;
+        }
+
+        button.control.secondary {
+            background: #2b2b2b;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: none;
+            font-weight: 600;
+        }
+
+        button.control:hover {
+            transform: translateY(-3px)
+        }
+
+        #resource-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-left: auto;
+            margin-right: 16px
+        }
+
+        .res-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: linear-gradient(180deg, var(--glass), var(--glass-strong));
+            min-width: 120px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.45);
+            transition: transform .12s ease, background .12s;
+        }
+
+        .res-card:hover {
+            transform: translateY(-4px);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01))
+        }
+
+        .res-icon {
+            width: 28px;
+            height: 28px;
+            flex: 0 0 28px
+        }
+
+        .res-meta {
+            display: flex;
+            flex-direction: column
+        }
+
+        .res-name {
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: 0.6px
+        }
+
+        .res-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff
+        }
+
+        #top-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-left: 12px
+        }
+
+        #turn-indicator {
+            font-size: 13px;
+            color: var(--muted);
+            padding: 6px 10px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.02)
+        }
+
+        #city-panel {
+            position: absolute;
+            right: 12px;
+            top: 110px;
+            width: 280px;
+            z-index: 50;
+            background: linear-gradient(180deg, #151515, #101010);
+            border-radius: 12px;
+            padding: 12px;
+            display: none;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        #city-panel .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px
+        }
+
+        #city-panel .city-name {
+            font-weight: 800
+        }
+
+        #city-panel .city-stats {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .city-stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--muted)
+        }
+
+        .city-stat img {
+            width: 18px
         }
 
         canvas {
             display: block;
+            width: 100%;
+            height: 100vh;
+            object-fit: cover
         }
 
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 5px;
-        }
-
-        button#nextTurn {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: #ff9800;
-            border: none;
+        #settings-menu {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(180deg, #1a1a1a, #151515);
+            padding: 16px 24px;
             border-radius: 12px;
-            padding: 10px 20px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #fff;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        button#resetGame {
-            position: absolute;
-            top: 10px;
-            left: 180px;
-            background: #e53935;
-            border: none;
-            border-radius: 12px;
-            padding: 10px 16px;
-            font-size: 14px;
-            font-weight: bold;
-            color: #fff;
-            cursor: pointer;
-            transition: 0.14s;
-        }
-
-        button#resetGame:hover {
-            transform: scale(1.03);
-            background: #d32f2f;
-        }
-
-        button:hover {
-            background: #e68900;
-            transform: scale(1.05);
-        }
-
-        #logo {
-            position: absolute;
-            top: -10px;
-            right: -10px;
-        }
-
-        #logo img {
-            width: 200px;
-        }
-
-        #top-info {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-            background: rgba(0, 0, 0, 0.45);
-            padding: 8px 12px;
-            border-radius: 8px;
-            display: flex;
+            display: none;
+            flex-direction: column;
             gap: 12px;
-            align-items: center;
-            z-index: 60;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 100;
         }
 
-        #top-info div {
-            display: flex;
-            gap: 6px;
-            align-items: center;
+        #settings-menu button {
+            width: 180px;
+        }
+
+        @media (max-width:900px) {
+            #ui-main {
+                left: 8px;
+                right: 8px;
+                padding: 6px;
+                height: 90px;
+                flex-direction: column;
+                align-items: flex-start
+            }
+
+            #resource-row {
+                margin-left: 6px
+            }
         }
     </style>
 </head>
 
 <body>
-    <div id="logo">
-        <img src="assets/images/logo.png" alt="Cities&Resources">
+    <div id="ui-main">
+        <div id="left-group">
+            <div id="logo"><img src="assets/images/logo.png" alt="Cities&Resources"></div>
+            <div id="top-controls">
+                <div id="turn-indicator">Turno: <span id="turn-number">1</span></div>
+                <div style="width:8px"></div>
+                <div style="display:flex;gap:8px">
+                    <button id="nextTurn" class="control">Próximo turno</button>
+                    <button id="settingsBtn" class="control secondary">⚙️</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="resource-row">
+            <div class="res-card" title="População total do jogador">
+                <img class="res-icon" src="assets/icons/population.png" alt="Pop">
+                <div class="res-meta">
+                    <div class="res-name">População</div>
+                    <div id="top-pop" class="res-value">0</div>
+                </div>
+            </div>
+
+            <div class="res-card" title="Comida total">
+                <img class="res-icon" src="assets/icons/food.png" alt="Food">
+                <div class="res-meta">
+                    <div class="res-name">Food</div>
+                    <div id="top-food" class="res-value">0</div>
+                </div>
+            </div>
+
+            <div class="res-card" title="Produção total">
+                <img class="res-icon" src="assets/icons/production.png" alt="Prod">
+                <div class="res-meta">
+                    <div class="res-name">Produção</div>
+                    <div id="top-production" class="res-value">0</div>
+                </div>
+            </div>
+
+            <div class="res-card" title="Dinheiro total">
+                <img class="res-icon" src="assets/icons/gold.png" alt="Money">
+                <div class="res-meta">
+                    <div class="res-name">Money</div>
+                    <div id="top-money" class="res-value">0</div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div id="turno">
-        <button id="nextTurn">Próximo turno</button>
-        <button id="resetGame">Reiniciar jogo</button>
-    </div>
-
-    <div id="city-panel"
-        style="position:absolute; right:12px; top:150px; background:rgba(10,10,10,0.85); color:#fff; padding:12px; border-radius:10px; display:none; width:260px; font-family:Arial, sans-serif; z-index:50;">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
+    <div id="city-panel">
+        <div class="header">
             <strong class="city-name">Cidade</strong>
             <button id="close-city-panel"
-                style="background:#ff5252;border:none;color:#fff;padding:4px 8px;border-radius:6px;cursor:pointer;">X</button>
+                style="background:#ff5252;border:none;color:#fff;padding:6px 8px;border-radius:8px;cursor:pointer">X</button>
         </div>
-        <div style="margin-top:8px; font-size:14px;">
-            <div>👥 Pop: <span class="city-pop">0</span></div>
-            <div>🍎 Food: <span class="city-food">0</span></div>
-            <div>🛠 Prod: <span class="city-prod">0</span></div>
-            <div>💵 Money: <span class="city-money">0</span></div>
+        <div class="city-stats">
+            <div class="city-stat"><img src="assets/icons/population.png" alt="pop"> Pop: <span
+                    class="city-pop">0</span></div>
+            <div class="city-stat"><img src="assets/icons/food.png" alt="food"> Food: <span class="city-food">0</span>
+            </div>
+            <div class="city-stat"><img src="assets/icons/production.png" alt="prod"> Prod: <span
+                    class="city-prod">0</span></div>
+            <div class="city-stat"><img src="assets/icons/gold.png" alt="money"> Money: <span
+                    class="city-money">0</span></div>
         </div>
+    </div>
+
+    <div id="settings-menu">
+        <button id="resetGameMenu" class="control secondary">Reiniciar partida</button>
     </div>
 
     <canvas id="canvas"></canvas>

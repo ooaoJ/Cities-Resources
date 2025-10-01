@@ -7,6 +7,10 @@ window.addEventListener('DOMContentLoaded', () => {
   const populationDisplay = document.getElementById('population');
   const moneyDisplay = document.getElementById('money');
 
+  if (typeof window.gameTurn === 'undefined') {
+    window.gameTurn = 1;
+  }
+
   function updateUI() {
     if (!window.cities) return;
 
@@ -20,7 +24,6 @@ window.addEventListener('DOMContentLoaded', () => {
     if (populationDisplay) populationDisplay.textContent = Math.floor(totalPopulation);
     if (moneyDisplay) moneyDisplay.textContent = Math.floor(totalMoney);
 
-    // atualizar fila do painel de cidade, se aberto
     const panel = document.getElementById('city-panel');
     if (panel && panel.style.display !== 'none') {
       const idx = parseInt(panel.dataset.cityIndex);
@@ -58,7 +61,7 @@ window.addEventListener('DOMContentLoaded', () => {
   window.updateUI = updateUI;
   updateUI();
 
-  // Próximo turno: (mantive a lógica, mas main.js faz o processamento principal)
+  // Próximo turno (lógica principal estava mais acima; aqui só um listener adicional para atualização visual)
   const nextTurnBtn = document.getElementById('nextTurn');
   if (nextTurnBtn) {
     nextTurnBtn.addEventListener('click', () => {
@@ -68,6 +71,7 @@ window.addEventListener('DOMContentLoaded', () => {
         city.money = (city.money || 0) + Math.floor((city.population || 0) * 0.5);
         city.production = (city.production || 0) + Math.floor((city.population || 0) * 0.1);
       });
+      window.gameTurn++;
       updateUI();
       const panel = document.getElementById('city-panel');
       if (panel && panel.style.display !== 'none') {
@@ -77,22 +81,21 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ---- Botão Reiniciar Jogo ----
-  const resetBtn = document.getElementById('resetGame');
-  if (resetBtn) {
-    resetBtn.addEventListener('click', () => {
-      const ok = confirm('Tem certeza que quer reiniciar o jogo? Isso apagará o progresso salvo e gerará um mapa novo.');
-      if (!ok) return;
-      try {
-        // remover save existente
-        localStorage.removeItem(LS_KEY);
-      } catch (e) {
-        console.warn('Erro ao limpar save:', e);
-      }
-      // recarregar a página para map.js criar um novo seed/mapa
-      location.reload();
-    });
-  }
+  // ---- Botão Reiniciar (compatível com 'resetGame' antigo ou 'resetGameMenu' novo) ----
+  const resetBtnOld = document.getElementById('resetGame');
+  const resetBtnMenu = document.getElementById('resetGameMenu');
+  const doReset = () => {
+    const ok = confirm('Tem certeza que quer reiniciar o jogo? Isso apagará o progresso salvo e gerará um mapa novo.');
+    if (!ok) return;
+    try {
+      localStorage.removeItem(LS_KEY);
+    } catch (e) {
+      console.warn('Erro ao limpar save:', e);
+    }
+    location.reload();
+  };
+  if (resetBtnOld) resetBtnOld.addEventListener('click', doReset);
+  if (resetBtnMenu) resetBtnMenu.addEventListener('click', doReset);
 
   // Painel da cidade
   const cityPanel = document.getElementById('city-panel');
@@ -127,35 +130,32 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // mapa de opções por terreno
+  // Build table e modal (mantive sua lógica)
   const BUILD_TABLE = {
-    0: [ // grass
+    0: [
       { type: 'farm', name: 'Fazenda', cost: 200, turns: 1 },
       { type: 'factory', name: 'Fábrica', cost: 500, turns: 3 },
       { type: 'market', name: 'Comércio', cost: 300, turns: 2 },
-      { type: 'house', name: 'Casa', cost: 100, turns: 1}
+      { type: 'house', name: 'Casa', cost: 100, turns: 1 }
     ],
-    1: [ // forest
+    1: [
       { type: 'lumber', name: 'Serralheria', cost: 250, turns: 2 },
       { type: 'hunting', name: 'Campo de Caça', cost: 150, turns: 1 }
     ],
-    2: [ // mountain
-      { type: 'mine', name: 'Mina', cost: 400, turns: 3 }
-    ],
-    4: [ // river
+    2: [{ type: 'mine', name: 'Mina', cost: 400, turns: 3 }],
+    4: [
       { type: 'mill', name: 'Moinho', cost: 180, turns: 1 },
-      { type: 'farm', name: 'Fazenda', cost: 200, turns: 1 }
+      { type: 'fishing', name: 'Pescaria', cost: 200, turns: 2}
     ],
-    5: [ // sand / desert
+    5: [
       { type: 'well', name: 'Poço', cost: 120, turns: 1 },
       { type: 'house', name: 'Casa', cost: 100, turns: 1 }
     ],
-    3: [ // ocean - poucas opções (ou nenhuma)
-      
+    3: [
+      { type: 'fishing', name: 'Pescaria (Mar)', cost: 250, turns: 3}
     ]
   };
 
-  // cria modal (DOM) uma vez
   let buildModal = null;
   function createBuildModal() {
     if (buildModal) return;
@@ -186,6 +186,10 @@ window.addEventListener('DOMContentLoaded', () => {
     buildModal.querySelector('#build-modal-cancel').addEventListener('click', () => {
       hideBuildModal();
     });
+
+    // prevenir propagação do clique para fechar overlays por engano
+    buildModal.querySelector('#build-modal-card').addEventListener('click', (e) => e.stopPropagation());
+    buildModal.addEventListener('click', () => hideBuildModal());
   }
 
   function showBuildModal(cityIndex, x, y) {
@@ -227,7 +231,6 @@ window.addEventListener('DOMContentLoaded', () => {
       body.appendChild(btn);
     });
 
-    // se não houver opções, mostra mensagem
     if (!options.length) {
       body.textContent = 'Nenhuma construção disponível neste terreno.';
     }
@@ -250,16 +253,112 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // hook que o map.js chama ao clicar num tile do território
-  window.onTerritoryTileClick = function(cityIndex, x, y) {
-    // abrir modal para o jogador escolher construção
+  window.onTerritoryTileClick = function (cityIndex, x, y) {
     showBuildModal(cityIndex, x, y);
   };
 
-  // conectar clique nas cidades (se já existirem)
   if (window.cities && window.cities.length) {
     window.cities.forEach((city, idx) => {
       city.click = () => showCityInfo(city, idx);
     });
   }
+
+  function refreshTopUI() {
+    const popEl = document.getElementById('top-pop');
+    const foodEl = document.getElementById('top-food');
+    const prodEl = document.getElementById('top-production');
+    const moneyEl = document.getElementById('top-money');
+    const turnEl = document.getElementById('turn-number');
+
+    let totalPop = 0, totalFood = 0, totalProd = 0, totalMoney = 0, turn = window.turn || window.gameTurn || 1;
+
+    if (window.cities && Array.isArray(window.cities)) {
+      for (let c of window.cities) {
+        totalPop += Number(c.population || c.pop || 0);
+        totalFood += Number(c.food || 0);
+        totalProd += Number(c.production || c.prod || c.prodution || 0);
+        totalMoney += Number(c.money || 0);
+      }
+    }
+
+    if (popEl) popEl.textContent = Math.floor(totalPop);
+    if (foodEl) foodEl.textContent = Math.floor(totalFood);
+    if (prodEl) prodEl.textContent = Math.floor(totalProd);
+    if (moneyEl) moneyEl.textContent = Math.floor(totalMoney);
+
+    if (turnEl) {
+      if (typeof window.gameTurn !== 'undefined') turn = window.gameTurn;
+      else if (typeof window.turn !== 'undefined') turn = window.turn;
+      turnEl.textContent = turn;
+    }
+  }
+
+  function wrapUpdateUI() {
+    if (typeof window.updateUI === 'function') {
+      const orig = window.updateUI;
+      window.updateUI = function () {
+        try { orig(); } catch (e) { console.warn('updateUI wrapper orig failed', e); }
+        try { refreshTopUI(); } catch (e) { console.warn('refreshTopUI failed', e); }
+      };
+      refreshTopUI();
+    } else {
+      setTimeout(wrapUpdateUI, 120);
+    }
+  }
+  wrapUpdateUI();
+
+  // Substitui calls diretas sem guarda que causavam erro quando elemento era null
+  const nextBtnForRefresh = document.getElementById('nextTurn');
+  if (nextBtnForRefresh) nextBtnForRefresh.addEventListener('click', () => { setTimeout(refreshTopUI, 140); });
+
+  const resetForRefresh = document.getElementById('resetGame') || document.getElementById('resetGameMenu');
+  if (resetForRefresh) resetForRefresh.addEventListener('click', () => { setTimeout(refreshTopUI, 120); });
+
+  const closeCityPanelEl = document.getElementById('close-city-panel');
+  if (closeCityPanelEl) closeCityPanelEl.addEventListener('click', () => {
+    const panel = document.getElementById('city-panel');
+    if (panel) panel.style.display = 'none';
+  });
+
+  (function hookCanvasClickToCityPanel() {
+    const cvs = document.getElementById('canvas');
+    if (!cvs) return;
+    cvs.addEventListener('dblclick', (e) => {
+      setTimeout(() => {
+        const panel = document.getElementById('city-panel');
+        if (panel && panel.dataset && panel.dataset.cityIndex !== undefined) {
+          panel.style.display = 'block';
+        }
+      }, 120);
+    });
+  })();
+
+  // --- Menu de configurações: prevenir double-bind e prevenir fechamento ao clicar dentro ---
+  const settingsBtn = document.getElementById('settingsBtn');
+  const settingsMenu = document.getElementById('settings-menu');
+
+  if (settingsBtn && settingsMenu) {
+    if (!settingsBtn.dataset.settingsBound) {
+      settingsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        settingsMenu.style.display = settingsMenu.style.display === 'flex' ? 'none' : 'flex';
+      });
+      settingsBtn.dataset.settingsBound = '1';
+    }
+
+    if (!settingsMenu.dataset.menuBound) {
+      settingsMenu.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+      settingsMenu.dataset.menuBound = '1';
+    }
+
+    if (!window._settingsWindowBound) {
+      window.addEventListener('click', () => {
+        settingsMenu.style.display = 'none';
+      });
+      window._settingsWindowBound = true;
+    }
+  }
+
 });
